@@ -1,10 +1,12 @@
-import { login, logout, getInfo, checkUsername } from '@/api/login'
+import { login, logout, checkUsername } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
   state: {
     token: getToken(),
+    id: 0,
     name: '',
+    photo: '',
     avatar: '',
     roles: []
   },
@@ -13,8 +15,14 @@ const user = {
     SET_TOKEN: (state, token) => {
       state.token = token
     },
+    SET_ID: (state, id) => {
+      state.id = id
+    },
     SET_NAME: (state, name) => {
       state.name = name
+    },
+    SET_PHOTO: (state, photo) => {
+      state.photo = photo
     },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar
@@ -26,35 +34,20 @@ const user = {
 
   actions: {
     // 登录
-    Login({ commit }, userInfo) {
+    Login({ commit, state }, userInfo) {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
         login(username, userInfo.password).then(response => {
           /* 验证账号密码这里只返回一个 token 值 */
-          const data = response.data
+          const admin = response.data;
           /* 把 Token 值存进 Cookies */
-          setToken(data.token)
+          setToken(admin.adminToken);
           /* 现在 store 的 state 也把 token 存下来了 */
-          commit('SET_TOKEN', data.token)
+          commit('SET_ID', admin.adminId)
+          commit('SET_TOKEN', admin.adminToken)
+          commit('SET_NAME', username)
+          commit('SET_PHOTO', admin.adminPhoto)
           resolve()
-        }).catch(error => {
-          reject(error)
-        })
-      })
-    },
-    // 获取用户信息
-    GetInfo({ commit, state }) {
-      return new Promise((resolve, reject) => {
-        getInfo(state.token).then(response => {
-          const data = response.data
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
-          }
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          resolve(response)
         }).catch(error => {
           reject(error)
         })

@@ -51,7 +51,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       'process.env': require('../config/dev.env')
     }),
     new webpack.HotModuleReplacementPlugin(),
-    // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
@@ -68,9 +67,7 @@ module.exports = new Promise((resolve, reject) => {
     if (err) {
       reject(err)
     } else {
-      // publish the new Port, necessary for e2e tests
       process.env.PORT = port
-      // add port to devServer config
       devWebpackConfig.devServer.port = port
 
       // Add FriendlyErrorsPlugin

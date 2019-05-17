@@ -6,82 +6,129 @@
 					<el-input v-model="searchForm.name" placeholder="请输入文章标题/用户昵称"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-button>查询</el-button>
+					<el-button @click="queryData">查询</el-button>
 				</el-form-item>
 			</el-form>
 		</header>
 		<el-table :data="replylist" element-loading-text="Loading" fit border highlight-current-row>
 			<el-table-column align="center" label="序号" width="80">
 				<template slot-scope="scope">
-					<span>{{ scope.row.index }}</span>
+					<span>{{ scope.row.qruId }}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="问题序号" width="120">
+			<el-table-column align="center" label="问题序号" width="100">
 				<template slot-scope="scope">
-					<span>{{ scope.row.questionindex}}</span>
+					<span>{{ scope.row.qruQuesId}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="评论序号" width="120">
+			<el-table-column align="center" label="评论序号" width="100">
 				<template slot-scope="scope">
-					<span>{{ scope.row.commentindex}}</span>
+					<span>{{ scope.row.qruCommentId}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="回复用户" width="120">
+			<el-table-column align="center" label="回复用户" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.firstuserindex}}</span>
+					<span>{{scope.row.qruUserId}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="被回复用户" width="120">
+			<el-table-column align="center" label="被回复用户" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.secuserindex}}</span>
+					<span>{{scope.row.qruUseredId}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="回复内容">
 				<template slot-scope="scope">
-					<span>{{scope.row.content}}</span>
+					<span>{{scope.row.qruContent}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="回复时间" width="120">
+			<el-table-column align="center" label="回复时间" width="160">
 				<template slot-scope="scope">
-					<span>{{scope.row.date}}</span>
+					<span>{{ scope.row.qruCreateDate.split('T')[0] }}&nbsp;&nbsp;&nbsp;{{ scope.row.qruCreateDate.split('T')[1].split('.')[0] }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="操作" width="200">
 				<template slot-scope="scope">
 					<el-button size="small" type="warning" plain>查看</el-button>
-					<el-button size="small" type="danger" plain>删除</el-button>
+					<el-button @click="delQR(scope.row.qruId)" size="small" type="danger" plain>删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+  			background
+  			layout="prev, pager, next"
+  			:total="total" :page-size.sync="pagesize" :current-page.sync="currentpage" 
+  			@current-change="pagechange">
+		</el-pagination>
 	</div>
 </template>
 <script>
+import { listQR, getQR, queryQR, delQR } from '@/api/questionReply';
+
 export default{
 	data(){
 		return {
+			total: 1000,
+			pagesize: 10,
+			currentpage: 1,
 			searchForm: {
 				name: ''
 			},
-			replylist: [
-				{
-					index: 1,
-					questionindex: 1,
-					commentindex: 1,
-					firstuserindex: 1,
-					secuserindex: 1,
-					content: '回复内容',
-					date: '56'
-				},
-				{
-					index: 2,
-					questionindex: 2,
-					commentindex: 2,
-					firstuserindex: 2,
-					secuserindex: 2,
-					content: '回复内容',
-					date: '56'
-				}
-			]
+			replylist: []
+		}
+	},
+	created(){
+		this.fetchData();
+	},
+	methods: {
+		fetchData(){
+			listQR(this.currentpage, this.pagesize).then(response => {
+				this.replylist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+				this.$message({
+            		type: 'error',
+            		message: '数据拉取失败!'
+            	});
+			})
+		},
+		queryData(){
+			queryQR(this.currentpage, this.pagesize, this.searchForm.name).then(response => {
+				this.replylist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+				this.$message({
+            		type: 'error',
+            		message: '数据查询失败!'
+            	});
+			})
+		},
+		pagechange(){
+			this.queryQR();
+		},
+		delQR(id){
+			this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				delQR(id).then(response => {
+					this.$message({
+            			type: 'success',
+            			message: '删除成功!'
+            		});
+				}).catch(error => {
+					this.$message({
+            			type: 'error',
+            			message: '删除失败!'
+            		});
+				})
+				this.queryData();
+			}).catch(() => {
+				this.$message({
+            		type: 'info',
+            		message: '已取消删除'
+          		});
+			})
 		}
 	}
 }
@@ -111,4 +158,9 @@ $blue: #5293B1;
 		}
 	}
 }	
+.el-pagination{
+	width: 300px;
+	margin: 0 auto;
+	margin-top: 40px;
+}
 </style>

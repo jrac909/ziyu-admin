@@ -7,62 +7,88 @@
 					</el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-button>查询</el-button>
+					<el-button @click="queryData">查询</el-button>
 				</el-form-item>
 			</el-form>
 		</header>
 		<el-table :data="mymsglist" element-loading-text="Loading" fit border highlight-current-row>
-			<el-table-column align="center" label="序号" width="60">
+			<el-table-column align="center" label="序号" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.index}}</span>
+					<span>{{scope.row.sxId}}</span>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" label="用户序号" width="60">
+			<el-table-column align="center" label="用户序号" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.userindex}}</span>
+					<span>{{scope.row.sxUserId}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="消息内容">
 				<template slot-scope="scope">
-					<span>{{scope.row.content}}</span>
+					<span>{{scope.row.sxContent}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="用户昵称" width="120">
 				<template slot-scope="scope">
-					<span>{{scope.row.username}}</span>
+					<span>{{scope.row.sxUserName}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="操作" width="280">
 				<template slot-scope="scope">
-					<el-button size="small" type="info" plain>回复</el-button>
 					<el-button size="small" type="warning" plain>查看</el-button>
-					<el-button size="small" type="danger" plain>删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+  			background
+  			layout="prev, pager, next"
+  			:total="total" :page-size.sync="pagesize" :current-page.sync="currentpage" 
+  			@current-change="pagechange">
+		</el-pagination>
 	</div>
 </template>
 <script>
+import { listSX, querySX, getSX } from '@/api/sixin';
+
 export default{
 	data(){
 		return {
+			total: 1000,
+			pagesize: 10,
+			currentpage: 1,
 			searchForm: {
 				name: ''
 			},
-			mymsglist: [
-				{
-					index: 1,
-					content: '内容',
-					userindex: 1,
-					username: '用户昵称'
-				},
-				{
-					index: 2,
-					content: '内容',
-					userindex: 2,
-					username: '用户昵称'
-				}
-			]
+			mymsglist: []
+		}
+	},
+	created(){
+		this.fetchData();
+	},
+	methods: {
+		fetchData(){
+			listSX(this.currentpage, this.pagesize).then(response => {
+				this.mymsglist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+				this.$message({
+            		type: 'error',
+            		message: '数据拉取失败!'
+            	});
+			})
+		},
+		queryData(){
+			querySX(this.currentpage, this.pagesize, this.searchForm.name).then(response => {
+				this.mymsglist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+				this.$message({
+            		type: 'error',
+            		message: '数据查询失败!'
+            	});
+			})
+		},
+		pagechange(){
+			this.queryData();
 		}
 	}
 }
@@ -91,5 +117,10 @@ $blue: #5293B1;
 			opacity: 0.9;
 		}
 	}
+}
+.el-pagination{
+	width: 300px;
+	margin: 0 auto;
+	margin-top: 40px;
 }
 </style>

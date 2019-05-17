@@ -19,16 +19,16 @@ Mock.XHR.prototype.send = function() {
 
 // User
 /* Mock.mock( rurl, rtype, template ):记录数据模板。当拦截到匹配 rurl 的 Ajax 的 rtype 请求时，将根据数据模板 template 生成模拟数据，并作为响应数据返回 */
-Mock.mock(/\/user\/login/, 'post', userAPI.login)
-Mock.mock(/\/user\/info/, 'get', userAPI.getInfo)
+/*Mock.mock(/\/user\/login/, 'post', userAPI.login)*/
+/*Mock.mock(/\/user\/info/, 'get', userAPI.getInfo)*/
 Mock.mock(/\/user\/logout/, 'post', userAPI.logout)
-Mock.mock(/\/user\/checkUsername/, 'get', userAPI.checkUsername)
+/*Mock.mock(/\/user\/checkUsername/, 'get', userAPI.checkUsername)*/
 
 // Table
 Mock.mock(/\/table\/list/, 'get', tableAPI.list)
 
 // Pic
-Mock.mock(/\/pic\/list/, 'get', picAPI.list)
-Mock.mock(/\/pic\/query/, 'post', picAPI.query)
+/*Mock.mock(/\/pic\/list/, 'get', picAPI.list)*/
+/*Mock.mock(/\/pic\/query/, 'post', picAPI.query)*/
 
 export default Mock

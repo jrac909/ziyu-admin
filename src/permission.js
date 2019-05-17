@@ -1,14 +1,20 @@
 import router from './router'
 import store from './store'
-import NProgress from 'nprogress' // progress bar
-import 'nprogress/nprogress.css' // progress bar style
-import { Message } from 'element-ui'
-import { getToken } from '@/utils/auth' // getToken from cookie
+import NProgress from 'nprogress' /* 轻量级 web 进度条 */
+import 'nprogress/nprogress.css' /* 进度条样式 */
+import { Message } from 'element-ui' /* 只引入用到的小组件 */
+import { getToken } from '@/utils/auth' /* auth 写了对 token 的操作，这里引入读取 token 操作 */
 
-NProgress.configure({ showSpinner: false })// NProgress configuration
+/**
+  首先，这个文件在 main.js 中引入了，项目启动会解析 main.js，就会加载这个 js 文件，文件中的 router.beforeEach
+  在路由请求时会自动执行
+**/
+
+NProgress.configure({ showSpinner: false }) /* 禁用进度环，就是圆圈的进度表示 */
 
 /* whiteList 是自己的一种处理方案，后面有写代码判断，所以也可以取其他名称 */
 const whiteList = ['/login'] // 不重定向白名单
+/* 请求router前先进入这个函数 */
 router.beforeEach((to, from, next) => {
   NProgress.start()
   if (getToken()) {
@@ -18,24 +24,7 @@ router.beforeEach((to, from, next) => {
       next({ path: '/' })
       NProgress.done() // if current page is dashboard will not trigger	afterEach hook, so manually handle it
     } else {
-      /* 已经登录并且不是跳转到登录页 */
-      /* stores 里面存储的 roles 还是 null, 说明是第一次请求还没有拉取用户信息 */
-      if (store.getters.roles.length === 0) {
-        /* 拉取用户信息 */
-        store.dispatch('GetInfo').then(res => { // 拉取用户信息
-          /* 按照本来的路径跳转 */
-          next()
-        }).catch((err) => {
-          /* 拉取信息失败的话，前端登出，移除 token */
-          store.dispatch('FedLogOut').then(() => {
-            Message.error(err || 'Verification failed, please login again')
-            next({ path: '/' })
-          })
-        })
-      } else {
-        /* roles 不为 null，则表示不是第一次请求，直接跳转 */
-        next()
-      }
+      next();
     }
   } else {
     /* token 为 null，也就是还没有登录 */

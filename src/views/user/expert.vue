@@ -20,49 +20,55 @@
 		<el-table :data="expertlist" element-loading-text="Loading" fit border highlight-current-row>
 			<el-table-column align="center" label="序号" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.index}}</span>
+					<span>{{scope.row.userId}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="专家账号" width="140">
 				<template slot-scope="scope">
-					<span>{{scope.row.account}}</span>
+					<span>{{scope.row.userAccount}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="专家名字">
 				<template slot-scope="scope">
-					<span>{{scope.row.name}}</span>
-				</template>
-			</el-table-column>
-			<el-table-column align="center" label="用户类型" width="140">
-				<template slot-scope="scope">
-					<span>{{scope.row.type}}</span>
+					<span>{{scope.row.expertTrueName}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="审核状态" width="140">
 				<template slot-scope="scope">
-					<span>{{scope.row.status}}</span>
+					<span>{{scope.row.expertShenhe == 0? '审核中':'已通过'}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="审核时间" width="160">
 				<template slot-scope="scope">
-					<span>{{scope.row.date}}</span>
+					<span>{{ scope.row.expertCreateDate.split("T")[0] }}&nbsp;&nbsp;{{ scope.row.expertCreateDate.split("T")[1].split(".")[0] }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="操作" width="280">
 				<template slot-scope="scope">
-					<el-button size="small" type="info" plain>审核</el-button>
-					<el-button size="small" type="warning" plain>查看</el-button>
-					<el-button v-if="scope.row.forbid == 0" size="small" type="danger" plain>禁用</el-button>
-					<el-button v-if="scope.row.forbid == 1" size="small" type="danger" plain>启用</el-button>
+					<el-button v-if="scope.row.expertShenhe == 0" size="small" type="info" plain>审核</el-button>
+					<el-button v-if="scope.row.expertShenhe == 1" size="small" type="info" plain>查看详情</el-button>
+					<el-button v-if="scope.row.expertDel == 0" size="small" type="danger" plain>禁用</el-button>
+					<el-button v-if="scope.row.expertDel == 1" size="small" type="danger" plain>启用</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+  			background
+  			layout="prev, pager, next"
+  			:total="total" :page-size.sync="pagesize" :current-page.sync="currentpage" 
+  			@current-change="pagechange">
+		</el-pagination>
 	</div>	
 </template>
 <script>
+import { listexpert} from '@/api/expert';
+
 export default{
 	data(){
 		return {
+			total: 0,
+			pagesize: 10,
+			currentpage: 1,
 			searchForm: {
 				type: '审核通过'
 			},
@@ -80,24 +86,23 @@ export default{
 					name: '审核未通过'
 				}
 			],
-			expertlist: [
-				{
-					index: 1,
-					account: '13330754958',
-					name: '专家名字',
-					status: '审核中',
-					date: '2019-3-18',
-					forbid: 0
-				},
-				{
-					index: 2,
-					account: '13330754958',
-					name: '专家名字',
-					status: '审核通过',
-					date: '2019-3-18',
-					forbid: 1
-				}
-			]
+			expertlist: []
+		}
+	},
+	created(){
+		this.fetchData();
+	},
+	methods: {
+		fetchData(){
+			listexpert(this.currentpage, this.pagesize).then(response => {
+				this.expertlist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+
+			})
+		},
+		pagechange(){
+			alert("切换页码");
 		}
 	}
 }
@@ -126,5 +131,10 @@ $blue: #5293B1;
 			opacity: 0.9;
 		}
 	}
+}
+.el-pagination{
+	width: 300px;
+	margin: 0 auto;
+	margin-top: 40px;
 }
 </style>

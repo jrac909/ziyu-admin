@@ -43,6 +43,7 @@ export default {
       checkUsername(value).then(response => {
         /* 需要注意，在拦截器中已经把 response.data 赋值给 response 了 */
         const admin = response.data;
+     
         /* 开发过程中mock没进行真正的验证，所以暂时都是ok的，idea完成验证了 */
         if (admin == null){
           callback(new Error('该用户不存在！'));

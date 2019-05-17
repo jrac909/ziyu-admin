@@ -42,6 +42,7 @@ export default {
   },
   checkUsername: res => {
     const { username } = param2Obj(res.url)
+
     if (true) {
       return {
         code: 20000,

@@ -48,7 +48,7 @@ export const constantRouterMap = [
     children: [{
       path: 'dashboard',
       name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
+      component: () => import('@/views/dashboard/index')
     }]
   },
   {
@@ -145,12 +145,7 @@ export const constantRouterMap = [
     name: 'Message',
     meta: {title: '消息管理', icon: "message"},
     children: [
-      {
-        path: 'index',
-        name: 'Index',
-        component: () => import('@/views/message/index'),
-        meta: {title: '消息管理'}
-      },
+  
       {
         path: 'mymsg',
         name: 'Mymsg',
@@ -164,8 +159,14 @@ export const constantRouterMap = [
     name: 'User',
     component: Layout,
     redirect: '/user/index',
-    meta: {title: '用户管理', icon: 'user'},
+    meta: {title: '资格审核', icon: 'user'},
     children: [
+      {
+        path: 'shenhe',
+        name: 'Shenhe',
+        component: () => import('@/views/user/shenhe'),
+        meta: {title: '审核申请'}
+      },
       {
         path: 'index',
         name: 'Index',

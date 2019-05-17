@@ -6,7 +6,7 @@
 					<el-input v-model="searchForm.name" placeholder="请输入标签名"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-button>查询</el-button>
+					<el-button @click="queryData">查询</el-button>
 				</el-form-item>
 			</el-form>
 		</header>
@@ -19,39 +19,48 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
     			<el-button @click="dialogFormVisible = false">取 消</el-button>
-    			<el-button class="comfirm-btn" type="primary" @click="dialogFormVisible = false">添 加</el-button>
+    			<el-button @click="" class="comfirm-btn" type="primary" @click="addTag">添 加</el-button>
   			</div>
 		</el-dialog>
 		<el-table :data="taglist" element-loading-text="Loading" fit border highlight-current-row>
 			<el-table-column align="center" label="序号" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.index}}</span>
+					<span>{{scope.row.qtId}}</span>
 				</template>
 			</el-table-column>	
 			<el-table-column align="center" label="标签名称">
 				<template slot-scope="scope">
-					<span>{{scope.row.name}}</span>
+					<span>{{scope.row.qtName}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="创建时间" width="200">
 				<template slot-scope="scope">
-					<span>{{scope.row.date}}</span>
+					<span>{{ scope.row.qtCreateDate.split("T")[0] }}&nbsp;&nbsp;{{ scope.row.qtCreateDate.split("T")[1].split(".")[0] }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="操作" width="280">
 				<template slot-scope="scope">
-					<el-button size="small" type="info" plain>编辑</el-button>
-					<el-button size="small" type="warning" plain>查看</el-button>
-					<el-button size="small" type="danger" plain>删除</el-button>
+					<el-button @click="delTag(scope.row.qtId)" size="small" type="danger" plain>删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+  			background
+  			layout="prev, pager, next"
+  			:total="total" :page-size.sync="pagesize" :current-page.sync="currentpage" 
+  			@current-change="pagechange">
+		</el-pagination>
 	</div>
 </template>
 <script>
+import { getQuesTagList, queryQuesTagList, delQuesTag, addQuesTag } from '@/api/questionTag';
+ 
 export default{
 	data(){
 		return {
+			total: 1000,
+			pagesize: 10,
+			currentpage: 1,
 			searchForm: {
 				name: ''
 			},
@@ -60,18 +69,59 @@ export default{
 				name: ''
 			},
 			formLabelWidth: '120px',
-			taglist: [
-				{
-					index: 1,
-					name: '标签名称',
-					date: '2019-6-23'
-				},
-				{
-					index: 2,
-					name: '标签名称',
-					date: '2019-6-23'
-				}
-			]
+			taglist: []
+		}
+	},
+	created(){
+		this.fetchData();
+	},
+	methods: {
+		fetchData(){
+			getQuesTagList(this.currentpage, this.pagesize).then(response => {
+				this.taglist = response.data;
+				this.total = response.total;
+			})
+		},
+		queryData(){
+			queryQuesTagList(this.currentpage, this.pagesize, this.searchForm.name).then(response => {
+				this.taglist = response.data;
+				this.total = response.total;
+			})
+		},
+		pagechange(){
+			this.queryData();
+		},
+		addTag(){
+			this.dialogFormVisible = false;
+			addQuesTag(this.addtag.name).then(response => {
+
+			});
+			this.queryData();
+		},
+		delTag(id){
+			this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				delQuesTag(id).then(response => {
+					this.$message({
+            			type: 'success',
+            			message: '删除成功!'
+            		});
+				}).catch(error => {
+					this.$message({
+            			type: 'error',
+            			message: '删除失败!'
+            		});
+				})
+				this.queryData();
+			}).catch(() => {
+				this.$message({
+            		type: 'info',
+            		message: '已取消删除'
+          		});
+			})
 		}
 	}
 }
@@ -118,4 +168,9 @@ $blue: #5293B1;
 		background-color: $blue;
 	}
 }	
+.el-pagination{
+	width: 300px;
+	margin: 0 auto;
+	margin-top: 40px;
+}
 </style>

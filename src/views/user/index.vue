@@ -26,44 +26,54 @@
 		<el-table :data="userlist" element-loading-text="Loading" fit border highlight-current-row>
 			<el-table-column align="center" label="序号" width="100">
 				<template slot-scope="scope">
-					<span>{{scope.row.index}}</span>
+					<span>{{scope.row.userId}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="用户账号" width="140">
 				<template slot-scope="scope">
-					<span>{{scope.row.account}}</span>
+					<span>{{scope.row.userAccount}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="用户昵称">
 				<template slot-scope="scope">
-					<span>{{scope.row.username}}</span>
+					<span>{{scope.row.userNickname}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="用户类型" width="140">
 				<template slot-scope="scope">
-					<span>{{scope.row.type}}</span>
+					<span>{{scope.row.userRole == 0 || scope.row.userRole == 2? '普通用户':'专家'}}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="注册时间" width="160">
 				<template slot-scope="scope">
-					<span>{{scope.row.date}}</span>
+					<span>{{ scope.row.userCreateDate.split("T")[0] }}&nbsp;&nbsp;{{ scope.row.userCreateDate.split("T")[1].split(".")[0] }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column align="center" label="操作" width="280">
 				<template slot-scope="scope">
-					<el-button size="small" type="info" plain>编辑</el-button>
-					<el-button size="small" type="warning" plain>查看</el-button>
-					<el-button v-if="scope.row.forbid == 0" size="small" type="danger" plain>禁用</el-button>
-					<el-button v-if="scope.row.forbid == 1" size="small" type="danger" plain>启用</el-button>
+					<el-button size="small" type="info" plain>查看</el-button>
+					<el-button v-if="scope.row.userStatus == 0" size="small" type="danger" plain>禁用</el-button>
+					<el-button v-if="scope.row.userStatus == 1" size="small" type="success" plain>启用</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+  			background
+  			layout="prev, pager, next"
+  			:total="total" :page-size.sync="pagesize" :current-page.sync="currentpage" 
+  			@current-change="pagechange">
+		</el-pagination>
 	</div>
 </template>
 <script>
+import { listuser } from '@/api/user';
+
 export default{
 	data(){
 		return {
+			total: 1000,
+			pagesize: 10,
+			currentpage: 1,
 			searchForm: {
 				name: '',
 				type: '专家',
@@ -81,23 +91,23 @@ export default{
 			],
 			forbidops: ['是', '否'],
 			userlist: [
-				{
-					index: 1,
-					account: '13330754958',
-					username: '用户昵称',
-					type: '普通用户',
-					date: '2019-3-18',
-					forbid: 0
-				},
-				{
-					index: 2,
-					account: '13330754958',
-					username: '用户昵称',
-					type: '普通用户',
-					date: '2019-3-18',
-					forbid: 1
-				}
 			]
+		}
+	},
+	created(){
+		this.fetchData();
+	},
+	methods: {
+		fetchData(){
+			listuser(this.currentpage, this.pagesize).then(response => {
+				this.userlist = response.data;
+				this.total = response.total;
+			}).catch(error => {
+
+			})
+		},
+		pagechange(){
+			alert("切换页码");
 		}
 	}
 }
@@ -126,5 +136,10 @@ $blue: #5293B1;
 			opacity: 0.9;
 		}
 	}
+}
+.el-pagination{
+	width: 300px;
+	margin: 0 auto;
+	margin-top: 40px;
 }
 </style>
